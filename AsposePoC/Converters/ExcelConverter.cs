@@ -18,24 +18,46 @@ namespace AsposePoC.Converters
             Image img;
             using (var workbook = new Workbook(filePath))
             {
-                using (var worksheet = workbook.Worksheets[0])
+                using (Worksheet worksheet = workbook.Worksheets[0])
                 {
 
                     var conversionOptions = new ImageOrPrintOptions()
                     {
-                        OnePagePerSheet = true,
+                        OnePagePerSheet = false,
                         ImageFormat = ImageFormat.Png,
                     };
-                    SheetRender renderer = new SheetRender(worksheet, conversionOptions);
+                    
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        renderer.ToImage(0, ms);
+                        RenderPreview(worksheet, ms, conversionOptions);
+                        if (ms.Length == 0)
+                        {
+                            FixEmptyExcel(worksheet);
+                            ms.Seek(0, 0);
+                            RenderPreview(worksheet, ms, conversionOptions);
+                        }
                         img = new Bitmap(ms);
                     }
                 }
             }
             return img;
         }
+
+
+        private void RenderPreview(Worksheet worksheet, MemoryStream ms, ImageOrPrintOptions conversionOptions)
+        {
+            SheetRender renderer = new SheetRender(worksheet, conversionOptions);
+            renderer.ToImage(0, ms);
+        }
+
+        private void FixEmptyExcel(Worksheet worksheet)
+        {
+            if (worksheet.Cells.MaxDataRow == -1 && worksheet.Cells.MaxDataColumn == -1)
+            {
+                worksheet.Cells[0, 0].Value = " ";
+            }
+        }
+
 
     }
 }
