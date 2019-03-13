@@ -19,7 +19,12 @@ namespace AsposePoC
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-
+            var button = (Button)sender;
+            button.Text = "Testing...";
+            var testRunner = new TestRunner(Common.PathTSrcFolder, pictureBox1);
+            testRunner.Run();
+            MessageBox.Show("Done.");
+            button.Text = "Start";
         }
     }
 }
